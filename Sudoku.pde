@@ -25,11 +25,11 @@ void draw() {
   textSize(32);
   fill(0);
   text("Solve", 484, 236);
-  
+
   //Create a "Reset" Button
   fill(255, 187, 141);
   rect(475, 125, cellSize*2, cellSize);
-  
+
   textSize(32);
   fill(0);
   text("Reset", 484, 161);
@@ -79,12 +79,12 @@ void mouseClicked() {
   //Check if "Solve" Button was clicked
   if (475<=mouseX && mouseX<=575 && 200<=mouseY && mouseY <=250) {
     g.resetBoard();
-    g.solve(0,0);
+    g.solve(0, 0);
   }
-  
+
   //Check if "Reset" Button was clicked
-  if(475<=mouseX && mouseX<=575 && 125<=mouseY && mouseY<=161){
-     g.resetBoard(); 
+  if (475<=mouseX && mouseX<=575 && 125<=mouseY && mouseY<=161) {
+    g.resetBoard();
   }
 }
 
@@ -94,6 +94,7 @@ public class Cell {
   private int number; //0 if empty, 1-9 otherwise
   private boolean isSelected; //Is this Cell currently selected for input?
   private boolean given; //Was this Cell given as a starting number? (Cannot be changed)
+  private int[] possibilities;
 
   public Cell(int userX, int userY, int userNumber) {
     x = userX;
@@ -101,6 +102,7 @@ public class Cell {
     number = userNumber;
     isSelected = false;
     given = false;
+    possibilities = new int[9];
   }
 
   //Default Constructor
@@ -163,9 +165,9 @@ public class Cell {
     this.number = num;
     given = true;
   }
-  
-  public void setGiven(){
-     this.given = true; 
+
+  public void setGiven(boolean give) {
+    this.given = give;
   }
 }
 
@@ -188,11 +190,8 @@ public class Game {
       }
     }
 
-    //gameBoard[0][3].changeNumber(5);
-    //this.easyBoard();
     rng = new Random();
     this.generateHardBoard();
-    //System.out.println(solve(0,0));
   }
 
   public Cell getCurrentCell(int row, int col) {
@@ -245,23 +244,86 @@ public class Game {
     gameBoard[7][8].initializeCell(4);
     gameBoard[8][8].initializeCell(9);
   }
-  
-  public void generateHardBoard(){
-    //Populate the initial board with 20 random numbers
-    
-      for(int i=0; i<10; i++){
-          int row = rng.nextInt(9);
-          int col = rng.nextInt(9);
-          int num = rng.nextInt(9)+1;
-          if(this.validMove(row,col,num)){
-             gameBoard[row][col].changeNumber(num);
-             gameBoard[row][col].setGiven();
-          }else{
-             i--; 
+
+  public void generateRandomBoard() {
+    //Attempt to populate the initial board with 81 random numbers
+    //Check to make sure the board has at least one solution each iteration
+    for (int i=0; i<9; i++) {
+      for (int j=0; j<9; j++) {
+        int num = rng.nextInt(9)+1;
+        System.out.println(num);
+        if (this.validMove(i, j, num)) {
+          gameBoard[i][j].changeNumber(num);
+          gameBoard[i][j].setGiven(true);
+          if (!this.solve(0, 0)) {
+            gameBoard[i][j].changeNumber(0);
+            gameBoard[i][j].setGiven(false);
+            j--;
           }
+          this.resetBoard();
+        }
       }
-      
-      
+    }
+
+
+    this.solve(0, 0);
+
+    for (int i=0; i<9; i++) {
+      for (int j=0; j<9; j++) {
+        gameBoard[i][j].setGiven(true);
+      }
+    }
+  }
+
+  public void generateEasyBoard() {
+    //Start board with 35 given cells
+
+    this.generateRandomBoard();
+
+    for (int i=0; i<46; i++) {
+      int row=rng.nextInt(9);
+      int col=rng.nextInt(9);
+      if (gameBoard[row][col].getNumber()!=0) {
+        gameBoard[row][col].changeNumber(0);
+        gameBoard[row][col].setGiven(false);
+      } else {
+        i--;
+      }
+    }
+  }
+
+  public void generateMediumBoard() {
+    //Start board with 27 given cells
+
+    this.generateRandomBoard();
+
+    for (int i=0; i<54; i++) {
+      int row=rng.nextInt(9);
+      int col=rng.nextInt(9);
+      if (gameBoard[row][col].getNumber()!=0) {
+        gameBoard[row][col].changeNumber(0);
+        gameBoard[row][col].setGiven(false);
+      } else {
+        i--;
+      }
+    }
+  }
+
+  public void generateHardBoard() {
+    //Start board with 20 given cells
+
+    this.generateRandomBoard();
+
+    for (int i=0; i<61; i++) {
+      int row=rng.nextInt(9);
+      int col=rng.nextInt(9);
+      if (gameBoard[row][col].getNumber()!=0) {
+        gameBoard[row][col].changeNumber(0);
+        gameBoard[row][col].setGiven(false);
+      } else {
+        i--;
+      }
+    }
   }
 
   public void drawBoard() {
@@ -321,17 +383,19 @@ public class Game {
     return true;
   }
 
-  public void resetBoard(){
+  public void resetBoard() {
     this.isSolved = false;
-     for(int i=0; i<9; i++){
-        for(int j=0; j<9; j++){
-           if(!gameBoard[i][j].getGiven()){gameBoard[i][j].changeNumber(0);} 
+    for (int i=0; i<9; i++) {
+      for (int j=0; j<9; j++) {
+        if (!gameBoard[i][j].getGiven()) {
+          gameBoard[i][j].changeNumber(0);
         }
-     }
+      }
+    }
   }
   public boolean solve(int row, int col) {
     //Recursive Function: parameters row and col represent where in the board to start each iteration
-    
+
     //System.out.println("Trying to solve");
     if (row>=9) {
       this.isSolved=true;
