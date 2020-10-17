@@ -8,7 +8,7 @@ Game g = new Game();
 Cell globalSelect = new Cell();
 
 void setup() {
-  size(450, 450);
+  size(600, 450);
   frameRate(30);
 
   g.textBoard();
@@ -16,6 +16,22 @@ void setup() {
 
 void draw() {
   g.drawBoard();
+
+  //Create a "Solve" Button
+  fill(255, 187, 141);
+  rect(475, 200, cellSize*2, cellSize);
+
+  textSize(32);
+  fill(0);
+  text("Solve", 484, 236);
+  
+  //Create a "Reset" Button
+  fill(255, 187, 141);
+  rect(475, 125, cellSize*2, cellSize);
+  
+  textSize(32);
+  fill(0);
+  text("Reset", 484, 161);
 
   for (int i=0; i<=3; i++) {
     strokeWeight(4);
@@ -33,6 +49,7 @@ void draw() {
       if ((x<1)||(x>9)) {
         System.out.println("Please enter a number 1 through 9");
       } else {
+        //System.out.println(g.validMove(globalSelect.getY()/cellSize, globalSelect.getX()/cellSize, x)); 
         globalSelect.changeNumber(x);
       }
     } 
@@ -43,24 +60,39 @@ void draw() {
 }
 
 void mouseClicked() {
+  //System.out.println(mouseX);
+  //System.out.println(mouseY);
   globalSelect.deSelectCell();
 
   //User selected cell
   int col = (mouseX/cellSize);
   int row = (mouseY/cellSize);
 
-  globalSelect = g.getCurrentCell(row, col);
-  if (!globalSelect.getGiven()) {
-    globalSelect.selectCell();
+  //Make sure a cell was clicked
+  if ((0<=col && col<9)&&(0<=row && row<9)) {
+    globalSelect = g.getCurrentCell(row, col);
+    if (!globalSelect.getGiven()) {
+      globalSelect.selectCell();
+    }
+  }
+  //Check if "Solve" Button was clicked
+  if (475<=mouseX && mouseX<=575 && 200<=mouseY && mouseY <=250) {
+    g.resetBoard();
+    g.solve(0,0);
+  }
+  
+  //Check if "Reset" Button was clicked
+  if(475<=mouseX && mouseX<=575 && 125<=mouseY && mouseY<=161){
+     g.resetBoard(); 
   }
 }
 
 public class Cell {
-  private int x;
-  private int y;
+  private int x; //This Cell's column
+  private int y; //This Cell's row
   private int number; //0 if empty, 1-9 otherwise
-  private boolean isSelected;
-  private boolean given;
+  private boolean isSelected; //Is this Cell currently selected for input?
+  private boolean given; //Was this Cell given as a starting number? (Cannot be changed)
 
   public Cell(int userX, int userY, int userNumber) {
     x = userX;
@@ -130,10 +162,16 @@ public class Cell {
     this.number = num;
     given = true;
   }
+  
+  public void setGiven(){
+     this.given = true; 
+  }
 }
 
 public class Game {
   private Cell[][] gameBoard;
+  private Random rng;
+  private boolean isSolved = false;
 
   public Game() {
     gameBoard = new Cell[9][9];
@@ -150,7 +188,9 @@ public class Game {
     }
 
     //gameBoard[0][3].changeNumber(5);
-    this.easyBoard();
+    //this.easyBoard();
+    rng = new Random();
+    this.generateHardBoard();
   }
 
   public Cell getCurrentCell(int row, int col) {
@@ -203,6 +243,24 @@ public class Game {
     gameBoard[7][8].initializeCell(4);
     gameBoard[8][8].initializeCell(9);
   }
+  
+  public void generateHardBoard(){
+    //Populate the initial board with 20 random numbers
+    
+      for(int i=0; i<20; i++){
+          int row = rng.nextInt(9);
+          int col = rng.nextInt(9);
+          int num = rng.nextInt(9)+1;
+          if(this.validMove(row,col,num)){
+             gameBoard[row][col].changeNumber(num);
+             gameBoard[row][col].setGiven();
+          }else{
+             i--; 
+          }
+      }
+      
+      
+  }
 
   public void drawBoard() {
     for (int i=0; i<9; i++) {
@@ -227,6 +285,81 @@ public class Game {
         System.out.print(" -----------------------");
       }
       System.out.println();
+    }
+  }
+
+  public boolean validMove(int row, int col, int num) {
+    //Check rows (column stays constant)
+    for (int rowNum=0; rowNum<9; rowNum++) {
+      if (gameBoard[rowNum][col].getNumber()==num) {
+        //System.out.println("Match found at: ("+(rowNum+1)+", "+(col+1)+")");
+        return false;
+      }
+    }
+
+    //Check columns (row stays constant)
+    for (int colNum=0; colNum<9; colNum++) {
+      if (gameBoard[row][colNum].getNumber()==num) {
+        //System.out.println("Match found at: ("+(row+1)+", "+(colNum+1)+")");
+        return false;
+      }
+    }
+
+    //Check 3x3 Square for current cell
+    int currRow = gameBoard[row][col].getY()/(3*cellSize);
+    int currCol = gameBoard[row][col].getX()/(3*cellSize);
+    for (int i=0; i<3; i++) {
+      for (int j=0; j<3; j++) {
+        if (gameBoard[i+(currRow*3)][j+(currCol*3)].getNumber()==num) {
+          //System.out.println("Match found at: ("+(i+(currRow*3)+1)+", "+(j+(currCol*3)+1)+")");
+          return false;
+        }
+      }
+    }
+    return true;
+  }
+
+  public void resetBoard(){
+    this.isSolved = false;
+     for(int i=0; i<9; i++){
+        for(int j=0; j<9; j++){
+           if(!gameBoard[i][j].getGiven()){gameBoard[i][j].changeNumber(0);} 
+        }
+     }
+  }
+  public void solve(int row, int col) {
+    //Recursive Function: parameters row and col represent where in the board to start each iteration
+
+    //System.out.println("Trying to solve");
+    if (row==9) {
+      this.isSolved=true;
+      //System.out.println("Solved!");
+    }
+
+    if (!this.isSolved) {
+      //System.out.println("Not Solved Yet");
+      if (!gameBoard[row][col].getGiven()) {//First check to make sure we are not looking at a given cell
+        for (int i=1; i<=9; i++) {
+          if (this.validMove(row, col, i)) {
+            gameBoard[row][col].changeNumber(i);
+
+            if (col==8) {
+              this.solve(row+1, 0);
+            } else {
+              this.solve(row, col+1);
+            }
+          }
+        }
+        if (!this.isSolved) {
+          gameBoard[row][col].changeNumber(0);
+        }
+      } else {
+        if (col==8) {
+          this.solve(row+1, 0);
+        } else {
+          this.solve(row, col+1);
+        }
+      }
     }
   }
 }
