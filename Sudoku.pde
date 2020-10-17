@@ -192,6 +192,7 @@ public class Game {
     //this.easyBoard();
     rng = new Random();
     this.generateHardBoard();
+    //System.out.println(solve(0,0));
   }
 
   public Cell getCurrentCell(int row, int col) {
@@ -248,7 +249,7 @@ public class Game {
   public void generateHardBoard(){
     //Populate the initial board with 20 random numbers
     
-      for(int i=0; i<20; i++){
+      for(int i=0; i<10; i++){
           int row = rng.nextInt(9);
           int col = rng.nextInt(9);
           int num = rng.nextInt(9)+1;
@@ -328,13 +329,14 @@ public class Game {
         }
      }
   }
-  public void solve(int row, int col) {
+  public boolean solve(int row, int col) {
     //Recursive Function: parameters row and col represent where in the board to start each iteration
-
+    
     //System.out.println("Trying to solve");
-    if (row==9) {
+    if (row>=9) {
       this.isSolved=true;
       //System.out.println("Solved!");
+      return this.isSolved;
     }
 
     if (!this.isSolved) {
@@ -362,5 +364,6 @@ public class Game {
         }
       }
     }
+    return this.isSolved;
   }
 }
