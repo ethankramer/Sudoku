@@ -5,86 +5,143 @@ import java.lang.Math;
 
 final int cellSize = 50;
 Game g = new Game();
+boolean menu = true;
 
 Cell globalSelect = new Cell();
 
 void setup() {
   size(600, 450);
-  frameRate(30);
-
-  g.textBoard();
+  frameRate(60);
 }
 
 void draw() {
-  g.drawBoard();
+  if (menu) {
+    //Creat Menu background
+    fill(219);
+    rect(0,0,600,450);
+    //Create a Menu with 3 options
+    
+    //Easy Button
+    fill(255, 187, 141);
+    rect(250, 100, cellSize*2, cellSize);
+    textSize(32);
+    fill(0);
+    text("Easy", 265, 136);
+    
+    //Medium Button
+    fill(255, 187, 141);
+    rect(250, 175, cellSize*2, cellSize);
+    textSize(26);
+    fill(0);
+    text("Medium", 250, 210);
+    
+    //Hard Button
+    fill(255, 187, 141);
+    rect(250, 250, cellSize*2, cellSize);
+    textSize(32);
+    fill(0);
+    text("Hard", 265, 286);
+  } else {
+    g.drawBoard();
 
-  //Create a "Solve" Button
-  fill(255, 187, 141);
-  rect(475, 200, cellSize*2, cellSize);
+    //Create a "Solve" Button
+    fill(255, 187, 141);
+    rect(475, 200, cellSize*2, cellSize);
 
-  textSize(32);
-  fill(0);
-  text("Solve", 484, 236);
+    textSize(32);
+    fill(0);
+    text("Solve", 484, 236);
 
-  //Create a "Reset" Button
-  fill(255, 187, 141);
-  rect(475, 125, cellSize*2, cellSize);
+    //Create a "Reset" Button
+    fill(255, 187, 141);
+    rect(475, 125, cellSize*2, cellSize);
 
-  textSize(32);
-  fill(0);
-  text("Reset", 484, 161);
+    textSize(32);
+    fill(0);
+    text("Reset", 484, 161);
 
-  for (int i=0; i<=3; i++) {
-    strokeWeight(4);
-    line(0, 3*cellSize*i, 9*cellSize, 3*cellSize*i);
-  }
+    //Create a Back to Menu Button
+    fill(255, 187, 141);
+    rect(475, 275, cellSize*2, cellSize);
+    
+    textSize(32);
+    fill(0);
+    text("Menu", 484, 312);
+    
+    for (int i=0; i<=3; i++) {
+      strokeWeight(4);
+      line(0, 3*cellSize*i, 9*cellSize, 3*cellSize*i);
+    }
 
-  for (int i=0; i<=3; i++) {
-    strokeWeight(4);
-    line(3*cellSize*i, 0, 3*cellSize*i, 9*cellSize);
-  }
-  if (keyPressed) {
-    String input = str(key);
-    try {
-      int x = Integer.parseInt(input);
-      if ((x<1)||(x>9)) {
-        System.out.println("Please enter a number 1 through 9");
-      } else {
-        //System.out.println(g.validMove(globalSelect.getY()/cellSize, globalSelect.getX()/cellSize, x)); 
-        globalSelect.changeNumber(x);
+    for (int i=0; i<=3; i++) {
+      strokeWeight(4);
+      line(3*cellSize*i, 0, 3*cellSize*i, 9*cellSize);
+    }
+    if (keyPressed) {
+      String input = str(key);
+      try {
+        int x = Integer.parseInt(input);
+        if ((x<1)||(x>9)) {
+          System.out.println("Please enter a number 1 through 9");
+        } else {
+          //System.out.println(g.validMove(globalSelect.getY()/cellSize, globalSelect.getX()/cellSize, x)); 
+          globalSelect.changeNumber(x);
+        }
+      } 
+      catch (NumberFormatException e) {
+        System.out.println("Please enter a number...");
       }
-    } 
-    catch (NumberFormatException e) {
-      System.out.println("Please enter a number...");
     }
   }
 }
 
 void mouseClicked() {
-  //System.out.println(mouseX);
-  //System.out.println(mouseY);
-  globalSelect.deSelectCell();
-
-  //User selected cell
-  int col = (mouseX/cellSize);
-  int row = (mouseY/cellSize);
-
-  //Make sure a cell was clicked
-  if ((0<=col && col<9)&&(0<=row && row<9)) {
-    globalSelect = g.getCurrentCell(row, col);
-    if (!globalSelect.getGiven()) {
-      globalSelect.selectCell();
+  if (menu) {
+    //Currently on the menu screen
+    //Check if user presses Easy, Medium, or Hard button
+    
+    if(250<=mouseX && mouseX<=350 && 100<=mouseY && mouseY<=150){
+       menu = false;
+       g.generateEasyBoard();
     }
-  }
-  //Check if "Solve" Button was clicked
-  if (475<=mouseX && mouseX<=575 && 200<=mouseY && mouseY <=250) {
-    g.resetBoard();
-    g.solve(0, 0);
-  }
+    if(250<=mouseX && mouseX<=350 && 175<=mouseY && mouseY<=225){
+       menu = false;
+       g.generateMediumBoard();
+    }
+    if(250<=mouseX && mouseX<=350 && 250<=mouseY && mouseY<=300){
+       menu = false;
+       g.generateHardBoard();
+    }
+  } else {
+    globalSelect.deSelectCell();
 
-  //Check if "Reset" Button was clicked
-  if (475<=mouseX && mouseX<=575 && 125<=mouseY && mouseY<=161) {
-    g.resetBoard();
+    //User selected cell
+    int col = (mouseX/cellSize);
+    int row = (mouseY/cellSize);
+
+    //Make sure a cell was clicked
+    if ((0<=col && col<9)&&(0<=row && row<9)) {
+      globalSelect = g.getCurrentCell(row, col);
+      if (!globalSelect.getGiven()) {
+        globalSelect.selectCell();
+      }
+    }
+    //Check if "Solve" Button was clicked
+    if (475<=mouseX && mouseX<=575 && 200<=mouseY && mouseY <=250) {
+      g.resetBoard();
+      g.solve(0, 0);
+    }
+
+    //Check if "Reset" Button was clicked
+    if (475<=mouseX && mouseX<=575 && 125<=mouseY && mouseY<=161) {
+      g.resetBoard();
+    }
+    
+    //Check if "Menu" button was clicked
+    if(475<=mouseX && mouseX<=575 && 275<=mouseY && mouseY<=325){
+       //g.resetBoard();
+       menu=true;
+    }
   }
 }
 
@@ -251,10 +308,8 @@ public class Game {
     for (int i=0; i<9; i++) {
       for (int j=0; j<9; j++) {
         int num = rng.nextInt(9)+1;
-        System.out.println(num);
         if (this.validMove(i, j, num)) {
-          gameBoard[i][j].changeNumber(num);
-          gameBoard[i][j].setGiven(true);
+          gameBoard[i][j].initializeCell(num);
           if (!this.solve(0, 0)) {
             gameBoard[i][j].changeNumber(0);
             gameBoard[i][j].setGiven(false);
