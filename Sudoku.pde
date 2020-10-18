@@ -16,25 +16,26 @@ void setup() {
 
 void draw() {
   if (menu) {
+    strokeWeight(1);
     //Creat Menu background
     fill(219);
-    rect(0,0,600,450);
+    rect(0, 0, 600, 450);
     //Create a Menu with 3 options
-    
+
     //Easy Button
     fill(255, 187, 141);
     rect(250, 100, cellSize*2, cellSize);
     textSize(32);
     fill(0);
     text("Easy", 265, 136);
-    
+
     //Medium Button
     fill(255, 187, 141);
     rect(250, 175, cellSize*2, cellSize);
     textSize(26);
     fill(0);
     text("Medium", 250, 210);
-    
+
     //Hard Button
     fill(255, 187, 141);
     rect(250, 250, cellSize*2, cellSize);
@@ -63,11 +64,11 @@ void draw() {
     //Create a Back to Menu Button
     fill(255, 187, 141);
     rect(475, 275, cellSize*2, cellSize);
-    
+
     textSize(32);
     fill(0);
     text("Menu", 484, 312);
-    
+
     for (int i=0; i<=3; i++) {
       strokeWeight(4);
       line(0, 3*cellSize*i, 9*cellSize, 3*cellSize*i);
@@ -99,18 +100,18 @@ void mouseClicked() {
   if (menu) {
     //Currently on the menu screen
     //Check if user presses Easy, Medium, or Hard button
-    
-    if(250<=mouseX && mouseX<=350 && 100<=mouseY && mouseY<=150){
-       menu = false;
-       g.generateEasyBoard();
+
+    if (250<=mouseX && mouseX<=350 && 100<=mouseY && mouseY<=150) {
+      menu = false;
+      g.generateEasyBoard();
     }
-    if(250<=mouseX && mouseX<=350 && 175<=mouseY && mouseY<=225){
-       menu = false;
-       g.generateMediumBoard();
+    if (250<=mouseX && mouseX<=350 && 175<=mouseY && mouseY<=225) {
+      menu = false;
+      g.generateMediumBoard();
     }
-    if(250<=mouseX && mouseX<=350 && 250<=mouseY && mouseY<=300){
-       menu = false;
-       g.generateHardBoard();
+    if (250<=mouseX && mouseX<=350 && 250<=mouseY && mouseY<=300) {
+      menu = false;
+      g.generateHardBoard();
     }
   } else {
     globalSelect.deSelectCell();
@@ -136,11 +137,11 @@ void mouseClicked() {
     if (475<=mouseX && mouseX<=575 && 125<=mouseY && mouseY<=161) {
       g.resetBoard();
     }
-    
+
     //Check if "Menu" button was clicked
-    if(475<=mouseX && mouseX<=575 && 275<=mouseY && mouseY<=325){
-       //g.resetBoard();
-       menu=true;
+    if (475<=mouseX && mouseX<=575 && 275<=mouseY && mouseY<=325) {
+      //g.resetBoard();
+      menu=true;
     }
   }
 }
